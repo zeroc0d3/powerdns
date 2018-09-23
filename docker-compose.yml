@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+    dnsdist:
+      image: 'tcely/dnsdist'
+      restart: 'unless-stopped'
+      container_name: 'tmp_dnsdist'
+      tty: true
+      stdin_open: true
+      command: ["--disable-syslog", "--uid", "dnsdist", "--gid", "dnsdist", "--verbose"]
+      volumes:
+        - ./rootfs/usr/local/etc/dnsdist/dnsdist.conf:/etc/dnsdist/dnsdist.conf:ro
+      expose:
+        - '53'
+        - '53/udp'
+      ports:
+        - '8990:53'
+        - '8990:53/udp'
+    recursor:
+      image: 'tcely/powerdns-recursor'
+      restart: 'unless-stopped'
+      container_name: 'tmp_recursor'
+      command: ["--disable-syslog=yes", "--log-timestamp=no", "--local-address=0.0.0.0", "--setuid=pdns-recursor", "--setgid=pdns-recursor"]
+      volumes:
+        - ./rootfs/usr/local/etc/pdns-recursor/recursor.conf:/etc/pdns-recursor/recursor.conf:ro
+      expose:
+        - '53'
+        - '53/udp'
